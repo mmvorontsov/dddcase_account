@@ -1,0 +1,65 @@
+imports:
+  - { resource: ../src/Context/Account/Infrastructure/DependencyInjection/Config/services.xml }
+
+# This file is the entry point to configure your own services.
+# Files in the packages/ subdirectory configure your dependencies.
+
+# Put parameters here that don't need to change on each machine where the app is deployed
+# https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
+parameters:
+  app.password_salt: '%env(APP_PASSWORD_SALT)%'
+  app.mailer_sender_email: '%env(APP_MAILER_SENDER_EMAIL)%'
+  app.mailer_sender_name: '%env(APP_MAILER_SENDER_NAME)%'
+  app.company: '%env(APP_COMPANY)%'
+  app.routing.uuid: !php/const App\System\Common\Enum\RegexEnum::UUID
+
+services:
+
+  # default configuration for services in *this* file
+  _defaults:
+    autowire: true      # Automatically injects dependencies in your services.
+    autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+
+  # migration fix
+  doctrine.migration.diff_listener:
+    class: App\System\EventSubscriber\Doctrine\MigrationEventSubscriber
+    tags:
+      - { name: doctrine.event_subscriber, connection: default }
+    arguments:
+      $environment: '%kernel.environment%'
+
+  security.password_encoder.sodium:
+    class: Symfony\Component\PasswordHasher\Hasher\SodiumPasswordHasher
+
+  # makes classes in src/ available to be used as services
+  # this creates a service per class whose id is the fully-qualified class name
+  App\:
+    resource: '../src/'
+    exclude:
+      - '../src/Context/'
+      - '../src/Kernel.php'
+
+  App\DataFixtures\:
+    resource: '../fixtures/'
+    tags: [ 'doctrine.fixture.orm' ]
+
+  # controllers are imported separately to make sure services can be injected
+  # as action arguments even if you don't address_frontend_protocol extend any base controller class
+  App\Presentation\Api\V1\Controller\:
+    resource: '../src/Presentation/Api/V1/Controller/'
+    tags: [ 'controller.service_arguments' ]
+
+  # param converter
+  App\Presentation\Api\V1\ParamConverter\:
+    resource: '../src/Presentation/Api/V1/ParamConverter/'
+    tags: [ 'request.param_converter' ]
+
+  # debugging controllers
+  App\System\Controller\:
+    resource: '../src/System/Controller/'
+    tags: [ 'controller.service_arguments' ]
+
+  #
+  App\System\EventSubscriber\Kernel\ExceptionSubscriber:
+    arguments:
+      $environment: '%kernel.environment%'

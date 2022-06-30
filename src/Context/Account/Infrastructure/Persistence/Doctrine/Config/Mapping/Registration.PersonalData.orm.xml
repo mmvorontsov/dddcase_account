@@ -1,0 +1,10 @@
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                         https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+    <embeddable name="App\Context\Account\Domain\Model\Registration\PersonalData">
+        <field name="firstname" column="firstname"/>
+        <field name="hashedPassword" column="hashed_password"/>
+        <field name="email" column="email" type="email_address"/>
+    </embeddable>
+</doctrine-mapping>

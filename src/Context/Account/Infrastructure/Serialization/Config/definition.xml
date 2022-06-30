@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<serializer xmlns="http://symfony.com/schema/dic/serializer-mapping"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://symfony.com/schema/dic/serializer-mapping
+        https://symfony.com/schema/dic/serializer-mapping/serializer-mapping-1.0.xsd">
+    <class name="App\Context\Account\Infrastructure\Notification\Recipient\NotificationRecipient">
+        <discriminator-map type-property="type">
+            <mapping type="EMAIL" class="App\Context\Account\Infrastructure\Notification\Recipient\EmailNotificationRecipient"/>
+            <mapping type="SMS" class="App\Context\Account\Infrastructure\Notification\Recipient\SmsNotificationRecipient"/>
+        </discriminator-map>
+    </class>
+    <class name="App\Context\Account\Application\UseCase\Command\CreateContactDataChange\CreateContactDataChangeRequest">
+        <discriminator-map type-property="type">
+            <mapping type="EMAIL" class="App\Context\Account\Application\UseCase\Command\CreateContactDataChange\Request\CreateEmailChangeRequest"/>
+            <mapping type="PHONE" class="App\Context\Account\Application\UseCase\Command\CreateContactDataChange\Request\CreatePhoneChangeRequest"/>
+        </discriminator-map>
+    </class>
+    <class name="App\Context\Account\Application\UseCase\Command\CreateCredentialRecovery\CreateCredentialRecoveryRequest">
+        <discriminator-map type-property="type">
+            <mapping type="EMAIL" class="App\Context\Account\Application\UseCase\Command\CreateCredentialRecovery\Request\CreateCredentialRecoveryByEmailRequest"/>
+            <mapping type="PHONE" class="App\Context\Account\Application\UseCase\Command\CreateCredentialRecovery\Request\CreateCredentialRecoveryByPhoneRequest"/>
+        </discriminator-map>
+    </class>
+</serializer>

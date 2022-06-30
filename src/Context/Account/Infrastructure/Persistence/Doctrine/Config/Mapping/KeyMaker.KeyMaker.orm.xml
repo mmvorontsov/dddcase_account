@@ -1,0 +1,39 @@
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                         https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+    <entity name="App\Context\Account\Domain\Model\KeyMaker\KeyMaker"
+            table="_key_maker"
+            inheritance-type="JOINED">
+        <discriminator-column name="type"/>
+        <discriminator-map>
+            <discriminator-mapping value="REGISTRATION"
+                                   class="App\Context\Account\Domain\Model\KeyMaker\RegistrationKeyMaker"/>
+            <discriminator-mapping value="CONTACT_DATA_CHANGE"
+                                   class="App\Context\Account\Domain\Model\KeyMaker\ContactDataChangeKeyMaker"/>
+            <discriminator-mapping value="CREDENTIAL_RECOVERY"
+                                   class="App\Context\Account\Domain\Model\KeyMaker\CredentialRecoveryKeyMaker"/>
+        </discriminator-map>
+        <id name="keyMakerId" column="key_maker__id" type="key_maker__id"/>
+        <field name="secretCodesLimit" column="secret_codes_limit" type="integer"/>
+        <field name="isMute" column="is_mute" type="boolean"/>
+        <field name="createdAt" column="created_at" type="datetime_immutable"/>
+        <field name="expiredAt" column="expired_at" type="datetime_immutable"/>
+        <embedded name="recipient" class="App\Context\Account\Domain\Model\KeyMaker\Recipient"
+                  column-prefix="recipient_"/>
+        <one-to-many field="secretCodes"
+                     target-entity="App\Context\Account\Domain\Model\KeyMaker\SecretCode\SecretCode"
+                     mapped-by="keyMaker"
+                     index-by="secretCodeId"
+                     fetch="EAGER"
+                     orphan-removal="true">
+            <cascade>
+                <cascade-persist/>
+                <cascade-remove/>
+            </cascade>
+            <order-by>
+                <order-by-field name="createdAt"/>
+            </order-by>
+        </one-to-many>
+    </entity>
+</doctrine-mapping>

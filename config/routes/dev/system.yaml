@@ -1,0 +1,11 @@
+debugging:
+  resource: ../../../src/System/Controller/Development/Preview
+  type: annotation
+  prefix: /_development/preview
+  format: html
+
+generation:
+  resource: ../../../src/System/Controller/Development/Generation
+  type: annotation
+  prefix: /_development/generation
+  format: json

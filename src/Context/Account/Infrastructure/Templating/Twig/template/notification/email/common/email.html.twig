@@ -1,0 +1,13 @@
+{% apply inky_to_html|inline_css(source('@accountTemplate/notification/email/common/css/foundation-emails.css')) %}
+    <container>
+        {% block content %}{% endblock %}
+        <row>
+            <columns>
+                <spacer size="32"></spacer>
+                <h5 class="text-center">
+                    {{ app.company }}
+                </h5>
+            </columns>
+        </row>
+    </container>
+{% endapply %}

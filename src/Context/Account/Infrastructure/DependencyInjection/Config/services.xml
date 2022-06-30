@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services https://symfony.com/schema/dic/services/services-1.0.xsd">
+    <services>
+
+        <defaults autowire="true" autoconfigure="true"/>
+
+        <prototype namespace="App\Context\Account\" resource="../../../*">
+            <exclude>../../../Application/**/*.php</exclude>
+            <exclude>../../../Domain/**/*.php</exclude>
+            <exclude>../../../Infrastructure/**/*.php</exclude>
+        </prototype>
+
+        <!-- Recommended order (not strict) -->
+        <prototype namespace="App\Context\Account\Domain\" resource="../../../Domain/*"/>
+        <prototype namespace="App\Context\Account\Application\" resource="../../../Application/*"/>
+        <prototype namespace="App\Context\Account\Infrastructure\" resource="../../../Infrastructure/*">
+            <exclude>../../../Infrastructure/**/InMemory*.php</exclude>
+        </prototype>
+
+        <instanceof id="App\Context\Account\Infrastructure\DependencyInjection\LazyServiceInterface" lazy="true"/>
+
+        <instanceof id="App\Context\Account\Domain\Event\Subscriber\DomainEventSubscriberInterface">
+            <tag name="messenger.message_handler" from_transport="sync" bus="event.bus"/>
+        </instanceof>
+
+        <instanceof id="App\Context\Account\Infrastructure\Messaging\Message\Internal\InternalCommandHandlerInterface">
+            <tag name="messenger.message_handler" from_transport="internal_command" bus="internal.command.bus"/>
+        </instanceof>
+
+        <instanceof id="App\Context\Account\Infrastructure\Messaging\Message\Internal\InternalEventSubscriberInterface">
+            <tag name="messenger.message_handler" from_transport="internal_event" bus="internal.event.bus"/>
+        </instanceof>
+
+        <instanceof id="App\Context\Account\Infrastructure\Messaging\Message\Interservice\InterserviceCommandHandlerInterface">
+            <tag name="messenger.message_handler" from_transport="interservice_command" bus="interservice.command.bus"/>
+        </instanceof>
+
+        <instanceof id="App\Context\Account\Infrastructure\Messaging\Message\Interservice\InterserviceEventSubscriberInterface">
+            <tag name="messenger.message_handler" from_transport="interservice_event" bus="interservice.event.bus"/>
+        </instanceof>
+
+        <instanceof id="App\Context\Account\Infrastructure\Messaging\Message\Interservice\InterserviceReplyHandlerInterface">
+            <tag name="messenger.message_handler" from_transport="interservice_reply" bus="interservice.reply.bus"/>
+        </instanceof>
+
+        <service id="App\Context\Account\Infrastructure\Security\Hasher\PasswordHasher">
+            <argument key="$passwordHasher" type="service" id="security.password_encoder.sodium"/>
+            <argument key="$passwordSalt">%app.password_salt%</argument>
+        </service>
+
+        <service id="App\Context\Account\Infrastructure\Notification\Assistant\EmailAssistant">
+            <argument type="string" key="$senderEmail">%app.mailer_sender_email%</argument>
+            <argument type="string" key="$senderName">%app.mailer_sender_name%</argument>
+        </service>
+
+    </services>
+</container>

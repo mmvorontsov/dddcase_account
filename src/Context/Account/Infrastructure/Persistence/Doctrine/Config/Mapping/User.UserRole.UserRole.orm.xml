@@ -1,0 +1,18 @@
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                         https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+    <entity name="App\Context\Account\Domain\Model\User\UserRole\UserRole" table="_user__role">
+        <unique-constraints>
+            <unique-constraint columns="user__id,role__id" name="_user__role_unique_group" />
+        </unique-constraints>
+        <indexes>
+            <index columns="role__id"/>
+        </indexes>
+        <id name="uuid" column="uuid" type="_uuid"/>
+        <field name="roleId" column="role__id" type="role__id"/>
+        <many-to-one field="user" target-entity="App\Context\Account\Domain\Model\User\User" inversed-by="userRoles">
+            <join-column name="user__id" referenced-column-name="user__id"/>
+        </many-to-one>
+    </entity>
+</doctrine-mapping>

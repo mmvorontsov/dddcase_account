@@ -1,0 +1,87 @@
+nelmio_api_doc:
+  documentation:
+    info:
+      title: dddcase account
+      description: Account service of DDDCase
+      version: 1.0.0
+    components:
+      schemas:
+        Success:
+          type: object
+          required:
+            - code
+            - data
+          properties:
+            code:
+              type: integer
+            data:
+              type: object
+        Error:
+          type: object
+          required:
+            - code
+            - message
+          properties:
+            code:
+              type: integer
+            message:
+              type: string
+      securitySchemes:
+        Bearer: # arbitrary name for the security scheme
+          type: http
+          scheme: bearer
+          bearerFormat: JWT
+      responses:
+        BadRequest:
+          response: 400
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        Forbidden:
+          response: 403
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        NotFound:
+          response: 404
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        UnprocessableEntity:
+          response: 422
+          description: Unprocessable Entity
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Error'
+                  - type: object
+                    required:
+                      - errors
+                    properties:
+                      errors:
+                        type: array
+                        items:
+                          type: object
+                          required:
+                            - code
+                            - message
+                            - path
+                          properties:
+                            code:
+                              type: string
+                            message:
+                              type: string
+                            path:
+                              type: string
+    security:
+      - Bearer: [ ]
+  areas: # to filter documented areas
+    path_patterns:
+      - ^/api(?!/_doc) # Accepts routes under /api except /api/_doc

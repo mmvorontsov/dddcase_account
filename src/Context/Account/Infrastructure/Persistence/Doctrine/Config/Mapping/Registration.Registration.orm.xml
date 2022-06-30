@@ -1,0 +1,14 @@
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                         https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+    <entity name="App\Context\Account\Domain\Model\Registration\Registration" table="_registration"
+            repository-class="App\Context\Account\Infrastructure\Adapter\Domain\Model\Registration\Doctrine\DoctrineRegistrationRepository">
+        <id name="registrationId" column="registration__id" type="registration__id"/>
+        <embedded name="personalData" class="App\Context\Account\Domain\Model\Registration\PersonalData"
+                  column-prefix="personal_data_"/>
+        <field name="status" column="status"/>
+        <field name="createdAt" column="created_at" type="datetime_immutable"/>
+        <field name="expiredAt" column="expired_at" type="datetime_immutable"/>
+    </entity>
+</doctrine-mapping>

@@ -1,0 +1,71 @@
+version: '3.9'
+services:
+  php:
+    build: ./php
+    image: dddcase_account_php
+    tty: true
+    restart: "no"
+    volumes:
+      - ../../:/var/www/html
+      - ./php/php.ini:/usr/local/etc/php/php.ini
+      - ./php/.bash_history:/root/.bash_history
+      - ./php/log/error.log:/var/www/log/php/error.log
+      - ./php/log/xdebug.log:/var/www/log/php/xdebug.log
+    environment:
+      PHP_IDE_CONFIG: serverName=${PHP_IDE_CONFIG}
+      XDEBUG_CONFIG: client_host=${XDEBUG_CLIENT_HOST} client_port=${XDEBUG_CLIENT_PORT} idekey=${XDEBUG_IDEKEY}
+    extra_hosts:
+      - host.docker.internal:${NETWORK_GATEWAY}
+    depends_on:
+      - postgres
+      - rabbitmq
+    networks:
+      - default
+  nginx:
+    image: nginx:1.18
+    restart: "no"
+    ports:
+      - "${NETWORK_GATEWAY}:${NGINX_PORT}:80"
+    volumes:
+      - ../../:/var/www/html
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - php
+    networks:
+      - default
+  postgres:
+    image: postgres:12.8
+    restart: "no"
+    ports:
+      - "${NETWORK_GATEWAY}:${POSTGRES_PORT}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: dddcase_account_user
+      POSTGRES_PASSWORD: password
+    networks:
+      - default
+  rabbitmq:
+    image: rabbitmq:3.7-management
+    restart: "no"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_VHOST}
+    ports:
+      - "${NETWORK_GATEWAY}:${RABBITMQ_PORT}:5672"
+      - "${NETWORK_GATEWAY}:${RABBITMQ_MANAGEMENT_PORT}:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - default
+volumes:
+  postgres_data:
+  rabbitmq_data:
+networks:
+  default:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: ${NETWORK_SUBNET}
+          gateway: ${NETWORK_GATEWAY}

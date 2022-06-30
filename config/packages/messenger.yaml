@@ -1,0 +1,110 @@
+framework:
+  messenger:
+
+    default_bus: event.bus
+    buses:
+      event.bus: ~
+      internal.command.bus: ~
+      internal.event.bus: ~
+      interservice.command.bus: ~
+      interservice.event.bus: ~
+      interservice.reply.bus: ~
+
+    # Uncomment this (and the failed transport below) to send failed messages to this transport for later handling.
+    failure_transport: internal_failed
+
+    serializer:
+      default_serializer: App\Context\Account\Infrastructure\Messaging\Transport\Serializer\DefaultSerializer
+      symfony_serializer:
+        format: json
+        context: { }
+
+    transports:
+      # https://symfony.com/doc/current/messenger.html#transport-configuration
+
+      # internal
+      internal_event:
+        dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+        options:
+          auto_setup: true
+          exchange:
+            name: dddcase_account_internal_event
+            type: fanout
+          queues:
+            dddcase_account_internal_event: ~
+
+      internal_command:
+        dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+        options:
+          auto_setup: true
+          exchange:
+            name: dddcase_account_internal_command
+            type: direct
+          queues:
+            dddcase_account_internal_command: ~
+
+      # interservice
+      interservice_event:
+        dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+        serializer: App\Context\Account\Infrastructure\Messaging\Transport\Serializer\InterserviceMessageSerializer
+        options:
+          auto_setup: true
+          exchange:
+            name: interservice_event
+            type: topic
+          queues:
+            dddcase_account_interservice_input_event:
+              binding_keys:
+                # to get messages from other systems
+                - dddcase_booking.order_created.v1
+
+      interservice_command:
+        dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+        serializer: App\Context\Account\Infrastructure\Messaging\Transport\Serializer\InterserviceMessageSerializer
+        options:
+          auto_setup: true
+          exchange:
+            name: interservice_command
+            type: direct
+          queues:
+            dddcase_account_interservice_input_command:
+              binding_keys:
+                # by convention, the commands are processed by the one to whom they are addressed, for example, account:
+                - dddcase_account.sync_user_access_rights.v1
+
+      interservice_reply:
+        dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+        serializer: App\Context\Account\Infrastructure\Messaging\Transport\Serializer\InterserviceMessageSerializer
+        options:
+          auto_setup: true
+          exchange:
+            name: interservice_reply
+            type: direct
+          queues:
+            dddcase_account_interservice_input_reply:
+              binding_keys:
+                # - for:dddcase_account|reply_of:dddcase_account.sync_user_access_rights.v1
+
+      # TODO Check retry send in Symfony 5.4
+      internal_failed:
+        dsn: '%env(MESSENGER_TRANSPORT_DSN)%'
+        options:
+          auto_setup: true
+          exchange:
+            name: dddcase_account_failed
+            type: fanout
+          queues:
+            dddcase_account_failed: ~
+
+      sync:
+        dsn: 'sync://'
+        retry_strategy:
+          max_retries: 0
+
+    routing:
+      'App\Context\Account\Domain\Event\DomainEventInterface': sync
+      'App\Context\Account\Infrastructure\Messaging\Message\Internal\InternalEventInterface': internal_event
+      'App\Context\Account\Infrastructure\Messaging\Message\Internal\InternalCommandInterface': internal_command
+      'App\Context\Account\Infrastructure\Messaging\Message\Interservice\InterserviceEventInterface': interservice_event
+      'App\Context\Account\Infrastructure\Messaging\Message\Interservice\InterserviceCommandInterface': interservice_command
+      'App\Context\Account\Infrastructure\Messaging\Message\Interservice\InterserviceReplyInterface': interservice_reply

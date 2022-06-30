@@ -1,0 +1,47 @@
+security:
+  
+  # https://symfony.com/doc/current/security/authenticator_manager.html
+  enable_authenticator_manager: true
+
+  # https://symfony.com/doc/current/security.html#c-hashing-passwords
+  password_hashers:
+    Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
+
+  # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
+  providers:
+    jwt:
+      lexik_jwt:
+        class: App\Context\Account\Infrastructure\Security\Client\Client
+
+  firewalls:
+    dev:
+      pattern: ^/(_(profiler|wdt|development)|css|images|js)
+      security: false
+    # api user registrations free access
+    api_v1_registrations:
+      pattern: ^/api/v1/registrations
+      security: false
+    api_v1_rcredential_recoveries:
+      pattern: ^/api/v1/credential-recoveries
+      security: false
+    # api (except api documentation)
+    api:
+      pattern: ^/api/[^(_doc)]
+      stateless: true
+      provider: jwt
+      jwt: ~
+    # other
+    other:
+      pattern: ^/
+      security: false
+
+      # activate different ways to authenticate
+      # https://symfony.com/doc/current/security.html#firewalls-authentication
+
+      # https://symfony.com/doc/current/security/impersonating_user.html
+      # switch_user: true
+
+  # Easy way to control access for large sections of your site
+  # Note: Only the *first* access control that matches will be used
+  access_control:
+    - { path: '^/api/[^(_doc)]', roles: IS_AUTHENTICATED_ANONYMOUSLY }

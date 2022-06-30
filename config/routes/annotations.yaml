@@ -1,0 +1,9 @@
+api_v1_controllers:
+  resource: ../../src/Presentation/Api/V1/Controller/
+  type: annotation
+  prefix: /api/v1
+  format: json
+
+kernel:
+  resource: ../../src/Kernel.php
+  type: annotation
